@@ -27,7 +27,7 @@ public class SolrLibQueryException extends SolrLibException {
 
     private static final long serialVersionUID = 1L;
 
-    private final List<Exception> exceptionList = new ArrayList<Exception>();
+    protected final List<Exception> exceptionList = new ArrayList<Exception>();
 
     public SolrLibQueryException(final String messageCode, final Object[] args) {
         super(messageCode, args);

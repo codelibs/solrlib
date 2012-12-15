@@ -143,7 +143,7 @@ public class SolrGroupManager implements Serializable {
 
     }
 
-    public SolrGroup getSolrServerGroup(final QueryType queryType) {
+    public SolrGroup getSolrGroup(final QueryType queryType) {
         switch (queryType) {
         case ADD:
         case COMMIT:
