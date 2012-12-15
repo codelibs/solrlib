@@ -36,7 +36,7 @@ public class StatusPolicyImpl implements StatusPolicy {
 
     protected static final String UNFINISHED = "unfinished";
 
-    protected DynamicProperties solrServerProperties;
+    protected DynamicProperties solrGroupProperties;
 
     /** the number of minimum active servers */
     protected int minSelectServer = 1;
@@ -70,8 +70,8 @@ public class StatusPolicyImpl implements StatusPolicy {
         case QUERY:
         case REQUEST:
         default:
-            solrServerProperties.setProperty(getStatusKey(serverName), ACTIVE);
-            solrServerProperties.store();
+            solrGroupProperties.setProperty(getStatusKey(serverName), ACTIVE);
+            solrGroupProperties.store();
             break;
         }
     }
@@ -86,14 +86,14 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
-            solrServerProperties.setProperty(getIndexKey(serverName),
+            solrGroupProperties.setProperty(getIndexKey(serverName),
                     UNFINISHED);
         case PING:
         case QUERY:
         case REQUEST:
-            solrServerProperties
+            solrGroupProperties
                     .setProperty(getStatusKey(serverName), INACTIVE);
-            solrServerProperties.store();
+            solrGroupProperties.store();
         default:
             break;
         }
@@ -146,7 +146,7 @@ public class StatusPolicyImpl implements StatusPolicy {
     @Override
     public boolean isAvailable(final QueryType queryType,
             final String serverName) {
-        final String serverStatus = solrServerProperties.getProperty(
+        final String serverStatus = solrGroupProperties.getProperty(
                 getStatusKey(serverName), ACTIVE);
         switch (queryType) {
         case PING:
@@ -162,7 +162,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         case DELETE:
         case OPTIMIZE:
             if (ACTIVE.equals(serverStatus)) {
-                final String serverIndex = solrServerProperties.getProperty(
+                final String serverIndex = solrGroupProperties.getProperty(
                         getIndexKey(serverName), COMPLETED);
                 return COMPLETED.equals(serverIndex);
             }
@@ -230,13 +230,13 @@ public class StatusPolicyImpl implements StatusPolicy {
         return INDEX_PREFIX + serverName;
     }
 
-    public DynamicProperties getSolrServerProperties() {
-        return solrServerProperties;
+    public DynamicProperties getSolrGroupProperties() {
+        return solrGroupProperties;
     }
 
-    public void setSolrServerProperties(
+    public void setSolrGroupProperties(
             final DynamicProperties solrServerProperties) {
-        this.solrServerProperties = solrServerProperties;
+        this.solrGroupProperties = solrServerProperties;
     }
 
     public int getMinSelectServer() {

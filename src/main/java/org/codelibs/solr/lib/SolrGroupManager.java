@@ -58,7 +58,7 @@ public class SolrGroupManager {
 
     protected String updateGroupName;
 
-    protected DynamicProperties groupStatusProperties;
+    protected DynamicProperties solrProperties;
 
     protected long monitoringInterval = 60 * 1000L;
 
@@ -71,13 +71,13 @@ public class SolrGroupManager {
     }
 
     public void init() {
-        if (groupStatusProperties == null) {
+        if (solrProperties == null) {
             throw new SolrLibException("ESL0010");
         }
 
-        selectGroupName = groupStatusProperties.getProperty(SELECT_GROUP,
+        selectGroupName = solrProperties.getProperty(SELECT_GROUP,
                 CoreLibConstants.EMPTY_STRING);
-        updateGroupName = groupStatusProperties.getProperty(UPDATE_GROUP,
+        updateGroupName = solrProperties.getProperty(UPDATE_GROUP,
                 CoreLibConstants.EMPTY_STRING);
 
         // check server name
@@ -88,7 +88,7 @@ public class SolrGroupManager {
         }
 
         if (selectGroupName == null) {
-            synchronized (groupStatusProperties) {
+            synchronized (solrProperties) {
                 if (selectGroupName != null) {
                     return;
                 }
@@ -109,11 +109,11 @@ public class SolrGroupManager {
                     updateGroupName = itr.next();
                 }
 
-                groupStatusProperties
+                solrProperties
                         .setProperty(SELECT_GROUP, selectGroupName);
-                groupStatusProperties
+                solrProperties
                         .setProperty(UPDATE_GROUP, updateGroupName);
-                groupStatusProperties.store();
+                solrProperties.store();
             }
         }
 
@@ -168,7 +168,7 @@ public class SolrGroupManager {
     }
 
     public void applyNewSolrGroup() {
-        synchronized (groupStatusProperties) {
+        synchronized (solrProperties) {
             selectGroupName = updateGroupName;
             final Set<String> nameSet = solrGroupMap.keySet();
             final String[] names = nameSet.toArray(new String[nameSet.size()]);
@@ -185,9 +185,9 @@ public class SolrGroupManager {
             }
             updateGroupName = names[num];
 
-            groupStatusProperties.setProperty(SELECT_GROUP, selectGroupName);
-            groupStatusProperties.setProperty(UPDATE_GROUP, updateGroupName);
-            groupStatusProperties.store();
+            solrProperties.setProperty(SELECT_GROUP, selectGroupName);
+            solrProperties.setProperty(UPDATE_GROUP, updateGroupName);
+            solrProperties.store();
         }
     }
 
@@ -217,13 +217,13 @@ public class SolrGroupManager {
         solrGroupMap.put(name, solrGroup);
     }
 
-    public DynamicProperties getGroupStatusProperties() {
-        return groupStatusProperties;
+    public DynamicProperties getSolrProperties() {
+        return solrProperties;
     }
 
-    public void setGroupStatusProperties(
+    public void setSolrProperties(
             final DynamicProperties groupStatusProperties) {
-        this.groupStatusProperties = groupStatusProperties;
+        this.solrProperties = groupStatusProperties;
     }
 
 }
