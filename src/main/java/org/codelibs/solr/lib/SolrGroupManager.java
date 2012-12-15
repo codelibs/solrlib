@@ -16,7 +16,6 @@
 
 package org.codelibs.solr.lib;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -41,13 +40,11 @@ import org.seasar.util.log.Logger;
  * @author shinsuke
  *
  */
-public class SolrGroupManager implements Serializable {
+public class SolrGroupManager {
     private static final Logger logger = Logger
             .getLogger(SolrGroupManager.class);
 
     private static final String NAME_SEPARATOR = ":";
-
-    private static final long serialVersionUID = 1L;
 
     protected static final String SELECT_GROUP = "select.group";
 
@@ -212,7 +209,7 @@ public class SolrGroupManager implements Serializable {
         return serverNameList.toArray(new String[serverNameList.size()]);
     }
 
-    public void addSolrServerGroup(final SolrGroup solrGroup) {
+    public void addSolrGroup(final SolrGroup solrGroup) {
         final String name = solrGroup.getGroupName();
         if (StringUtil.isBlank(name)) {
             throw new SolrLibException("ESL0007");

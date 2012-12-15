@@ -229,4 +229,69 @@ public class StatusPolicyImpl implements StatusPolicy {
     protected String getIndexKey(final String serverName) {
         return INDEX_PREFIX + serverName;
     }
+
+    public DynamicProperties getSolrServerProperties() {
+        return solrServerProperties;
+    }
+
+    public void setSolrServerProperties(
+            final DynamicProperties solrServerProperties) {
+        this.solrServerProperties = solrServerProperties;
+    }
+
+    public int getMinSelectServer() {
+        return minSelectServer;
+    }
+
+    public void setMinSelectServer(final int minSelectServer) {
+        this.minSelectServer = minSelectServer;
+    }
+
+    public int getMinUpdateServer() {
+        return minUpdateServer;
+    }
+
+    public void setMinUpdateServer(final int minUpdateServer) {
+        this.minUpdateServer = minUpdateServer;
+    }
+
+    public long getRetrySelectQueryInterval() {
+        return retrySelectQueryInterval;
+    }
+
+    public void setRetrySelectQueryInterval(final long retrySelectQueryInterval) {
+        this.retrySelectQueryInterval = retrySelectQueryInterval;
+    }
+
+    public long getRetryUpdateQueryInterval() {
+        return retryUpdateQueryInterval;
+    }
+
+    public void setRetryUpdateQueryInterval(final long retryUpdateQueryInterval) {
+        this.retryUpdateQueryInterval = retryUpdateQueryInterval;
+    }
+
+    public int getMaxErrorCount() {
+        return maxErrorCount;
+    }
+
+    public void setMaxErrorCount(final int maxErrorCount) {
+        this.maxErrorCount = maxErrorCount;
+    }
+
+    public int getMaxRetryUpdateQueryCount() {
+        return maxRetryUpdateQueryCount;
+    }
+
+    public void setMaxRetryUpdateQueryCount(final int maxRetryUpdateQueryCount) {
+        this.maxRetryUpdateQueryCount = maxRetryUpdateQueryCount;
+    }
+
+    public int getMaxRetrySelectQueryCount() {
+        return maxRetrySelectQueryCount;
+    }
+
+    public void setMaxRetrySelectQueryCount(final int maxRetrySelectQueryCount) {
+        this.maxRetrySelectQueryCount = maxRetrySelectQueryCount;
+    }
 }
