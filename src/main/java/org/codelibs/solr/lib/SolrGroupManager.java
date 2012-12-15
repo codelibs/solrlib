@@ -28,7 +28,6 @@ import java.util.TimerTask;
 import org.apache.solr.client.solrj.SolrServer;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.util.DynamicProperties;
-import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.seasar.util.log.Logger;
@@ -52,7 +51,7 @@ public class SolrGroupManager {
 
     protected Map<String, SolrGroup> solrGroupMap = new LinkedHashMap<String, SolrGroup>();
 
-    protected Timer monitorTimer = new Timer("SolrGroupMonitor");
+    protected Timer monitorTimer;
 
     protected String selectGroupName;
 
@@ -109,15 +108,16 @@ public class SolrGroupManager {
                     updateGroupName = itr.next();
                 }
 
-                solrProperties
-                        .setProperty(SELECT_GROUP, selectGroupName);
-                solrProperties
-                        .setProperty(UPDATE_GROUP, updateGroupName);
+                solrProperties.setProperty(SELECT_GROUP, selectGroupName);
+                solrProperties.setProperty(UPDATE_GROUP, updateGroupName);
                 solrProperties.store();
             }
         }
 
-        monitorTimer.cancel();
+        if (monitorTimer != null) {
+            monitorTimer.cancel();
+        }
+        monitorTimer = new Timer("SolrGroupMonitor");
         monitorTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -211,7 +211,7 @@ public class SolrGroupManager {
 
     public void addSolrGroup(final SolrGroup solrGroup) {
         final String name = solrGroup.getGroupName();
-        if (StringUtil.isBlank(name)) {
+        if (org.seasar.util.lang.StringUtil.isBlank(name)) {
             throw new SolrLibException("ESL0007");
         }
         solrGroupMap.put(name, solrGroup);
@@ -221,9 +221,8 @@ public class SolrGroupManager {
         return solrProperties;
     }
 
-    public void setSolrProperties(
-            final DynamicProperties groupStatusProperties) {
-        this.solrProperties = groupStatusProperties;
+    public void setSolrProperties(final DynamicProperties groupStatusProperties) {
+        solrProperties = groupStatusProperties;
     }
 
 }

@@ -86,13 +86,12 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
-            solrGroupProperties.setProperty(getIndexKey(serverName),
-                    UNFINISHED);
+            solrGroupProperties
+                    .setProperty(getIndexKey(serverName), UNFINISHED);
         case PING:
         case QUERY:
         case REQUEST:
-            solrGroupProperties
-                    .setProperty(getStatusKey(serverName), INACTIVE);
+            solrGroupProperties.setProperty(getStatusKey(serverName), INACTIVE);
             solrGroupProperties.store();
         default:
             break;
@@ -235,8 +234,8 @@ public class StatusPolicyImpl implements StatusPolicy {
     }
 
     public void setSolrGroupProperties(
-            final DynamicProperties solrServerProperties) {
-        this.solrGroupProperties = solrServerProperties;
+            final DynamicProperties solrGroupProperties) {
+        this.solrGroupProperties = solrGroupProperties;
     }
 
     public int getMinSelectServer() {
