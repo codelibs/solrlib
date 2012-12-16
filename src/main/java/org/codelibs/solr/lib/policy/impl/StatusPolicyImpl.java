@@ -24,17 +24,19 @@ import org.codelibs.solr.lib.policy.StatusPolicy;
 
 public class StatusPolicyImpl implements StatusPolicy {
 
-    protected static final String STATUS_PREFIX = "status.";
+    public static final String STATUS_PREFIX = "status.";
 
-    protected static final String INDEX_PREFIX = "index.";
+    public static final String INDEX_PREFIX = "index.";
 
-    protected static final String ACTIVE = "active";
+    public static final String ACTIVE = "active";
 
-    protected static final String INACTIVE = "inactive";
+    public static final String INACTIVE = "inactive";
 
-    protected static final String COMPLETED = "completed";
+    public static final String COMPLETED = "completed";
 
-    protected static final String UNFINISHED = "unfinished";
+    public static final String UNFINISHED = "unfinished";
+
+    public static final String READY = "ready";
 
     protected DynamicProperties solrGroupProperties;
 
@@ -62,10 +64,11 @@ public class StatusPolicyImpl implements StatusPolicy {
     @Override
     public void activate(final QueryType queryType, final String serverName) {
         switch (queryType) {
-        case ADD:
         case COMMIT:
-        case DELETE:
         case OPTIMIZE:
+            solrGroupProperties.setProperty(getIndexKey(serverName), COMPLETED);
+        case ADD:
+        case DELETE:
         case PING:
         case QUERY:
         case REQUEST:
@@ -102,13 +105,13 @@ public class StatusPolicyImpl implements StatusPolicy {
      * @see org.codelibs.solr.lib.policy.StatusPolicy#isAvailable(org.codelibs.solr.lib.policy.QueryType, java.util.Set)
      */
     @Override
-    public boolean isAvailable(final QueryType queryType,
+    public boolean isActive(final QueryType queryType,
             final Set<String> serverNameSet) {
 
         // check the number of an active server
         int numOfActive = 0;
         for (final String serverName : serverNameSet) {
-            if (isAvailable(queryType, serverName)) {
+            if (isActive(queryType, serverName)) {
                 // active
                 numOfActive++;
             }
@@ -143,8 +146,7 @@ public class StatusPolicyImpl implements StatusPolicy {
      * @see org.codelibs.solr.lib.policy.StatusPolicy#isAvailable(org.codelibs.solr.lib.policy.QueryType, java.lang.String)
      */
     @Override
-    public boolean isAvailable(final QueryType queryType,
-            final String serverName) {
+    public boolean isActive(final QueryType queryType, final String serverName) {
         final String serverStatus = solrGroupProperties.getProperty(
                 getStatusKey(serverName), ACTIVE);
         switch (queryType) {
@@ -163,7 +165,8 @@ public class StatusPolicyImpl implements StatusPolicy {
             if (ACTIVE.equals(serverStatus)) {
                 final String serverIndex = solrGroupProperties.getProperty(
                         getIndexKey(serverName), COMPLETED);
-                return COMPLETED.equals(serverIndex);
+                return COMPLETED.equals(serverIndex)
+                        || READY.equals(serverIndex);
             }
             break;
         default:

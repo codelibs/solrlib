@@ -24,9 +24,9 @@ public interface StatusPolicy {
 
     void deactivate(QueryType queryType, String serverName);
 
-    boolean isAvailable(QueryType queryType, Set<String> serverNameSet);
+    boolean isActive(QueryType queryType, Set<String> serverNameSet);
 
-    boolean isAvailable(QueryType queryType, String serverName);
+    boolean isActive(QueryType queryType, String serverName);
 
     void sleep(QueryType queryType);
 

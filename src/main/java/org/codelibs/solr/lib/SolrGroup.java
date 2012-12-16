@@ -319,7 +319,7 @@ public class SolrGroup {
                     }
                 }
                 if ((minValue == null || count.get() < minValue.get())
-                        && statusPolicy.isAvailable(QueryType.QUERY,
+                        && statusPolicy.isActive(QueryType.QUERY,
                                 entry.getKey())) {
                     // active
                     minValue = count;
@@ -342,7 +342,7 @@ public class SolrGroup {
             }
 
             // status check
-            if (!statusPolicy.isAvailable(QueryType.REQUEST, solrServerName)) {
+            if (!statusPolicy.isActive(QueryType.REQUEST, solrServerName)) {
                 // TODO exception
             }
 
@@ -401,7 +401,7 @@ public class SolrGroup {
                     }
                 }
                 if ((minValue == null || count.get() < minValue.get())
-                        && statusPolicy.isAvailable(QueryType.REQUEST,
+                        && statusPolicy.isActive(QueryType.REQUEST,
                                 entry.getKey())) {
                     // active
                     minValue = count;
@@ -424,7 +424,7 @@ public class SolrGroup {
             }
 
             // status check
-            if (!statusPolicy.isAvailable(QueryType.REQUEST, solrServerName)) {
+            if (!statusPolicy.isActive(QueryType.REQUEST, solrServerName)) {
                 // TODO exception
             }
 
@@ -485,7 +485,7 @@ public class SolrGroup {
             for (final Map.Entry<String, SolrServer> entry : solrServerMap
                     .entrySet()) {
                 final String serverName = entry.getKey();
-                if (statusPolicy.isAvailable(queryType, serverName)) {
+                if (statusPolicy.isActive(queryType, serverName)) {
                     executeUpdateQuery(queryType, upc, resultList, entry,
                             serverName, 0);
                 }
@@ -519,9 +519,13 @@ public class SolrGroup {
         }
     }
 
+    public boolean isActive(final QueryType queryType) {
+        return statusPolicy.isActive(queryType, solrServerMap.keySet());
+    }
+
     protected void checkStatus(final QueryType queryType) {
         // if this server group is unavailable, throws SolrLibException.
-        if (!statusPolicy.isAvailable(queryType, solrServerMap.keySet())) {
+        if (!statusPolicy.isActive(queryType, solrServerMap.keySet())) {
             throw new SolrLibGroupNotAvailableException(groupName);
         }
     }
@@ -532,7 +536,7 @@ public class SolrGroup {
             for (final Map.Entry<String, SolrServer> entry : solrServerMap
                     .entrySet()) {
                 final String serverName = entry.getKey();
-                if (!statusPolicy.isAvailable(QueryType.PING, serverName)) {
+                if (!statusPolicy.isActive(QueryType.PING, serverName)) {
                     // you can activate a server when the status is inactive only..
                     try {
                         final SolrPingResponse pingResponse = entry.getValue()

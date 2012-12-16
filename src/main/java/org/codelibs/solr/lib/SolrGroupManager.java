@@ -35,19 +35,12 @@ import org.seasar.util.log.Logger;
 /**
  * Solr server group manager.
  * 
- * 
  * @author shinsuke
  *
  */
 public class SolrGroupManager {
     private static final Logger logger = Logger
             .getLogger(SolrGroupManager.class);
-
-    private static final String NAME_SEPARATOR = ":";
-
-    protected static final String SELECT_GROUP = "select.group";
-
-    protected static final String UPDATE_GROUP = "update.group";
 
     protected Map<String, SolrGroup> solrGroupMap = new LinkedHashMap<String, SolrGroup>();
 
@@ -74,10 +67,10 @@ public class SolrGroupManager {
             throw new SolrLibException("ESL0010");
         }
 
-        selectGroupName = solrProperties.getProperty(SELECT_GROUP,
-                CoreLibConstants.EMPTY_STRING);
-        updateGroupName = solrProperties.getProperty(UPDATE_GROUP,
-                CoreLibConstants.EMPTY_STRING);
+        selectGroupName = solrProperties.getProperty(
+                SolrLibConstants.SELECT_GROUP, CoreLibConstants.EMPTY_STRING);
+        updateGroupName = solrProperties.getProperty(
+                SolrLibConstants.UPDATE_GROUP, CoreLibConstants.EMPTY_STRING);
 
         // check server name
         if (solrGroupMap.get(selectGroupName) == null) {
@@ -108,8 +101,10 @@ public class SolrGroupManager {
                     updateGroupName = itr.next();
                 }
 
-                solrProperties.setProperty(SELECT_GROUP, selectGroupName);
-                solrProperties.setProperty(UPDATE_GROUP, updateGroupName);
+                solrProperties.setProperty(SolrLibConstants.SELECT_GROUP,
+                        selectGroupName);
+                solrProperties.setProperty(SolrLibConstants.UPDATE_GROUP,
+                        updateGroupName);
                 solrProperties.store();
             }
         }
@@ -185,8 +180,10 @@ public class SolrGroupManager {
             }
             updateGroupName = names[num];
 
-            solrProperties.setProperty(SELECT_GROUP, selectGroupName);
-            solrProperties.setProperty(UPDATE_GROUP, updateGroupName);
+            solrProperties.setProperty(SolrLibConstants.SELECT_GROUP,
+                    selectGroupName);
+            solrProperties.setProperty(SolrLibConstants.UPDATE_GROUP,
+                    updateGroupName);
             solrProperties.store();
         }
     }
@@ -202,7 +199,8 @@ public class SolrGroupManager {
                 .entrySet()) {
             for (final Map.Entry<String, SolrServer> serverEntry : groupEntry
                     .getValue().solrServerMap.entrySet()) {
-                serverNameList.add(groupEntry.getKey() + NAME_SEPARATOR
+                serverNameList.add(groupEntry.getKey()
+                        + SolrLibConstants.GROUP_SERVER_SEPARATOR
                         + serverEntry.getKey());
             }
         }
