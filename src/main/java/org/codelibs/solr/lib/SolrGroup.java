@@ -63,6 +63,10 @@ public class SolrGroup {
         solrServerMap.put(name, solrServer);
     }
 
+    public String[] getServerNames() {
+        return solrServerMap.keySet().toArray(new String[solrServerMap.size()]);
+    }
+
     public Collection<UpdateResponse> add(
             final Collection<SolrInputDocument> docs) {
         // check this group status
