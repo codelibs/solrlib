@@ -38,6 +38,7 @@ import org.apache.solr.common.util.NamedList;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.exception.SolrLibGroupNotAvailableException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
+import org.codelibs.solr.lib.exception.SolrLibServerNotAvailableException;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.util.log.Logger;
@@ -342,8 +343,9 @@ public class SolrGroup {
             }
 
             // status check
-            if (!statusPolicy.isActive(QueryType.REQUEST, solrServerName)) {
-                // TODO exception
+            if (!statusPolicy.isActive(QueryType.QUERY, solrServerName)) {
+                throw new SolrLibServerNotAvailableException(groupName,
+                        solrServerName);
             }
 
             final QueryResponse queryResponse = solrServer
@@ -425,7 +427,8 @@ public class SolrGroup {
 
             // status check
             if (!statusPolicy.isActive(QueryType.REQUEST, solrServerName)) {
-                // TODO exception
+                throw new SolrLibServerNotAvailableException(groupName,
+                        solrServerName);
             }
 
             final NamedList<Object> response = solrServer.request(request);
