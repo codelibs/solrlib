@@ -18,6 +18,7 @@ package org.codelibs.solr.lib.server;
 
 import java.net.MalformedURLException;
 
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.HttpClient;
@@ -61,4 +62,10 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
         }
     }
 
+    public void addRequestInterceptor(final HttpRequestInterceptor itcp) {
+        final HttpClient httpClient = getHttpClient();
+        if (httpClient instanceof AbstractHttpClient) {
+            ((AbstractHttpClient) httpClient).addRequestInterceptor(itcp);
+        }
+    }
 }
