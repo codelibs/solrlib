@@ -67,8 +67,15 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case OPTIMIZE:
             solrGroupProperties.setProperty(getIndexKey(serverName), COMPLETED);
+            solrGroupProperties.setProperty(getStatusKey(serverName), ACTIVE);
+            solrGroupProperties.store();
+            break;
         case ADD:
         case DELETE:
+            solrGroupProperties.setProperty(getIndexKey(serverName), READY);
+            solrGroupProperties.setProperty(getStatusKey(serverName), ACTIVE);
+            solrGroupProperties.store();
+            break;
         case PING:
         case QUERY:
         case REQUEST:
