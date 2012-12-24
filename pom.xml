@@ -27,23 +27,12 @@
       <url>http://www.chazine.com/</url>
     </developer>
   </developers>
-<!--
   <distributionManagement>
     <repository>
       <id>fess-repository</id>
       <url>scpexe://shell.sourceforge.jp:/home/groups/f/fe/fess/htdocs/repository/</url>
     </repository>
-    <site>
-      <id>fess-site</id>
-      <url>scpexe://shell.sourceforge.jp:/home/groups/f/fe/fess/htdocs/</url>
-    </site>
   </distributionManagement>
-  <scm>
-    <connection>scm:svn:http://svn.sourceforge.jp/svnroot/fess/fess-launcher/trunk</connection>
-    <developerConnection>scm:svn:https://svn.sourceforge.jp/svnroot/fess/fess-launcher/trunk</developerConnection>
-    <url>http://sourceforge.jp/projects/fess/svn/view/</url>
-  </scm>
--->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -112,6 +101,13 @@
         </configuration>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>1.0-beta-6</version>
+      </extension>
+    </extensions>
   </build>
   <pluginRepositories>
     <pluginRepository>
