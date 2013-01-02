@@ -16,7 +16,6 @@
 
 package org.codelibs.solr.lib;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -28,10 +27,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -39,6 +38,7 @@ import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.exception.SolrLibGroupNotAvailableException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
 import org.codelibs.solr.lib.exception.SolrLibServerNotAvailableException;
+import org.codelibs.solr.lib.exception.SolrLibServiceException;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.util.log.Logger;
@@ -284,21 +284,24 @@ public class SolrGroup {
         // check this group status
         checkStatus(QueryType.QUERY);
 
-        SolrLibQueryException fsqe = null;
+        SolrLibServiceException fsqe = null;
         final int maxRetryCount = statusPolicy
                 .getMaxRetryCount(QueryType.QUERY);
         for (int i = 0; i < maxRetryCount; i++) {
             try {
                 return queryInternal(params, method);
+            } catch (final SolrLibQueryException e) {
+                throw e;
             } catch (final Exception e) {
                 if (fsqe == null) {
-                    fsqe = new SolrLibQueryException("ESL0011",
+                    fsqe = new SolrLibServiceException("ESL0011",
                             new Object[] { params.toString() });
                 }
                 fsqe.addException(e);
             }
             statusPolicy.sleep(QueryType.QUERY);
         }
+
         throw fsqe;
     }
 
@@ -359,7 +362,17 @@ public class SolrGroup {
             errorCountMap.remove(solrServerName);
 
             return queryResponse;
-        } catch (final SolrServerException e) {
+        } catch (final Exception e) {
+            if (e instanceof SolrException) {
+                switch (((SolrException) e).code()) {
+                case 500:
+                    // an invalid query
+                    throw new SolrLibQueryException("ESL0013",
+                            new Object[] { params }, e);
+                default:
+                    break;
+                }
+            }
             throw getQueryException(QueryType.QUERY, params, solrServerName, e);
         }
     }
@@ -368,15 +381,17 @@ public class SolrGroup {
         // check this group status
         checkStatus(QueryType.REQUEST);
 
-        SolrLibQueryException fsqe = null;
+        SolrLibServiceException fsqe = null;
         final int maxRetryCount = statusPolicy
                 .getMaxRetryCount(QueryType.REQUEST);
         for (int i = 0; i < maxRetryCount; i++) {
             try {
                 return requestInternal(request);
+            } catch (final SolrLibQueryException e) {
+                throw e;
             } catch (final Exception e) {
                 if (fsqe == null) {
-                    fsqe = new SolrLibQueryException("ESL0011",
+                    fsqe = new SolrLibServiceException("ESL0011",
                             new Object[] { request.toString() });
                 }
                 fsqe.addException(e);
@@ -441,10 +456,17 @@ public class SolrGroup {
             errorCountMap.remove(solrServerName);
 
             return response;
-        } catch (final IOException e) {
-            throw getQueryException(QueryType.REQUEST, request, solrServerName,
-                    e);
-        } catch (final SolrServerException e) {
+        } catch (final Exception e) {
+            if (e instanceof SolrException) {
+                switch (((SolrException) e).code()) {
+                case 500:
+                    // an invalid query
+                    throw new SolrLibQueryException("ESL0013",
+                            new Object[] { request }, e);
+                default:
+                    break;
+                }
+            }
             throw getQueryException(QueryType.REQUEST, request, solrServerName,
                     e);
         }
