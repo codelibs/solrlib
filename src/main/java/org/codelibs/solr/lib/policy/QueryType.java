@@ -17,5 +17,5 @@
 package org.codelibs.solr.lib.policy;
 
 public enum QueryType {
-    ADD, COMMIT, DELETE, OPTIMIZE, PING, QUERY, REQUEST;
+    ADD, COMMIT, DELETE, OPTIMIZE, PING, QUERY, REQUEST, ROLLBACK;
 }

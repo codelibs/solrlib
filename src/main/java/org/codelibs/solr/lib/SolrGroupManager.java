@@ -141,6 +141,7 @@ public class SolrGroupManager {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
+        case ROLLBACK:
             return getSolrGroup(updateGroupName);
         case QUERY:
         case REQUEST:

@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.StreamingResponseCallback;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -43,6 +44,12 @@ import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 import org.seasar.util.log.Logger;
 
+/**
+ * SolrGroup is a proxy implemetation to a group of SolrServer instances.
+ * 
+ * @author shinsuke
+ *
+ */
 public class SolrGroup {
 
     private static final Logger logger = Logger.getLogger(SolrGroup.class);
@@ -67,8 +74,22 @@ public class SolrGroup {
         return solrServerMap.keySet().toArray(new String[solrServerMap.size()]);
     }
 
+    /**
+     * Adds a collection of documents
+     * @param docs  the collection of documents
+     */
     public Collection<UpdateResponse> add(
             final Collection<SolrInputDocument> docs) {
+        return add(docs, -1);
+    }
+
+    /**
+     * Adds a collection of documents, specifying max time before they become committed
+     * @param docs  the collection of documents
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> add(
+            final Collection<SolrInputDocument> docs, final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.ADD);
 
@@ -77,7 +98,7 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.add(docs);
+                            return solrServer.add(docs, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -85,7 +106,21 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Adds a single document
+     * @param doc  the input document
+     */
     public Collection<UpdateResponse> add(final SolrInputDocument doc) {
+        return add(doc, -1);
+    }
+
+    /**
+     * Adds a single document specifying max time before it becomes committed
+     * @param doc  the input document
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> add(final SolrInputDocument doc,
+            final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.ADD);
 
@@ -94,7 +129,7 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.add(doc);
+                            return solrServer.add(doc, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -102,7 +137,21 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Adds a single bean
+     * @param obj  the input bean
+     */
     public Collection<UpdateResponse> addBean(final Object obj) {
+        return addBean(obj, -1);
+    }
+
+    /**
+     * Adds a single bean specifying max time before it becomes committed
+     * @param obj  the input bean
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> addBean(final Object obj,
+            final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.ADD);
 
@@ -111,7 +160,7 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.addBean(obj);
+                            return solrServer.addBean(obj, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -119,7 +168,21 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Adds a collection of beans
+     * @param beans  the collection of beans
+     */
     public Collection<UpdateResponse> addBean(final Collection<?> beans) {
+        return addBean(beans, -1);
+    }
+
+    /**
+     * Adds a collection of beans specifying max time before they become committed
+     * @param beans  the collection of beans
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> addBean(final Collection<?> beans,
+            final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.ADD);
 
@@ -128,7 +191,7 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.addBeans(beans);
+                            return solrServer.addBeans(beans, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -136,25 +199,33 @@ public class SolrGroup {
                 });
     }
 
+    /** 
+     * Performs an explicit commit, causing pending documents to be committed for indexing
+     * <p>
+     * waitFlush=true and waitSearcher=true to be inline with the defaults for plain HTTP access
+     */
     public Collection<UpdateResponse> commit() {
-        // check this group status
-        checkStatus(QueryType.COMMIT);
-
-        return updateQueryCallback(QueryType.COMMIT,
-                new UpdateProcessCallback<UpdateResponse>() {
-                    @Override
-                    public UpdateResponse callback(final SolrServer solrServer) {
-                        try {
-                            return solrServer.commit();
-                        } catch (final Exception e) {
-                            throw new SolrLibException(e);
-                        }
-                    }
-                });
+        return commit(true, true, false);
     }
 
+    /** 
+     * Performs an explicit commit, causing pending documents to be committed for indexing
+     * @param waitFlush  block until index changes are flushed to disk
+     * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
+     */
     public Collection<UpdateResponse> commit(final boolean waitFlush,
             final boolean waitSearcher) {
+        return commit(waitFlush, waitSearcher, false);
+    }
+
+    /**
+     * Performs an explicit commit, causing pending documents to be committed for indexing
+     * @param waitFlush  block until index changes are flushed to disk
+     * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible
+     * @param softCommit makes index changes visible while neither fsync-ing index files nor writing a new index descriptor
+     */
+    public Collection<UpdateResponse> commit(final boolean waitFlush,
+            final boolean waitSearcher, final boolean softCommit) {
         // check this group status
         checkStatus(QueryType.COMMIT);
 
@@ -171,7 +242,46 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Performs a rollback of all non-committed documents pending.
+     * <p>
+     * Note that this is not a true rollback as in databases. Content you have previously
+     * added may have been committed due to autoCommit, buffer full, other client performing
+     * a commit etc.
+     */
+    public Collection<UpdateResponse> rollback(final boolean waitFlush,
+            final boolean waitSearcher, final boolean softCommit) {
+        // check this group status
+        checkStatus(QueryType.ROLLBACK);
+
+        return updateQueryCallback(QueryType.ROLLBACK,
+                new UpdateProcessCallback<UpdateResponse>() {
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.rollback();
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Deletes documents from the index based on a query
+     * @param query  the query expressing what documents to delete
+     */
     public Collection<UpdateResponse> deleteByQuery(final String query) {
+        return deleteByQuery(query, -1);
+    }
+
+    /**
+     * Deletes documents from the index based on a query, specifying max time before commit
+     * @param query  the query expressing what documents to delete
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> deleteByQuery(final String query,
+            final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.DELETE);
 
@@ -180,7 +290,8 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.deleteByQuery(query);
+                            return solrServer.deleteByQuery(query,
+                                    commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -188,7 +299,21 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Deletes a single document by unique ID
+     * @param id  the ID of the document to delete
+     */
     public Collection<UpdateResponse> deleteById(final String id) {
+        return deleteById(id, -1);
+    }
+
+    /**
+     * Deletes a single document by unique ID, specifying max time before commit
+     * @param id  the ID of the document to delete
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> deleteById(final String id,
+            final int commitWithinMs) {
         // check this group status
         checkStatus(QueryType.DELETE);
 
@@ -197,7 +322,7 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.deleteById(id);
+                            return solrServer.deleteById(id, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -205,16 +330,30 @@ public class SolrGroup {
                 });
     }
 
-    public Collection<UpdateResponse> optimize() {
-        // check this group status
-        checkStatus(QueryType.OPTIMIZE);
+    /**
+     * Deletes a list of documents by unique ID
+     * @param ids  the list of document IDs to delete 
+     */
+    public Collection<UpdateResponse> deleteById(final List<String> ids) {
+        return deleteById(ids, -1);
+    }
 
-        return updateQueryCallback(QueryType.OPTIMIZE,
+    /**
+     * Deletes a list of documents by unique ID, specifying max time before commit
+     * @param ids  the list of document IDs to delete 
+     * @param commitWithinMs  max time (in ms) before a commit will happen 
+     */
+    public Collection<UpdateResponse> deleteById(final List<String> ids,
+            final int commitWithinMs) {
+        // check this group status
+        checkStatus(QueryType.DELETE);
+
+        return updateQueryCallback(QueryType.DELETE,
                 new UpdateProcessCallback<UpdateResponse>() {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.optimize();
+                            return solrServer.deleteById(ids, commitWithinMs);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -222,24 +361,38 @@ public class SolrGroup {
                 });
     }
 
+    /** 
+     * Performs an explicit optimize, causing a merge of all segments to one.
+     * <p>
+     * waitFlush=true and waitSearcher=true to be inline with the defaults for plain HTTP access
+     * <p>
+     * Note: In most cases it is not required to do explicit optimize
+     */
+    public Collection<UpdateResponse> optimize() {
+        return optimize(true, true, 1);
+    }
+
+    /** 
+     * Performs an explicit optimize, causing a merge of all segments to one.
+     * <p>
+     * Note: In most cases it is not required to do explicit optimize
+     * @param waitFlush  block until index changes are flushed to disk
+     * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
+     */
     public Collection<UpdateResponse> optimize(final boolean waitFlush,
             final boolean waitSearcher) {
-        // check this group status
-        checkStatus(QueryType.OPTIMIZE);
+        return optimize(waitFlush, waitSearcher, 1);
 
-        return updateQueryCallback(QueryType.OPTIMIZE,
-                new UpdateProcessCallback<UpdateResponse>() {
-                    @Override
-                    public UpdateResponse callback(final SolrServer solrServer) {
-                        try {
-                            return solrServer.optimize(waitFlush, waitSearcher);
-                        } catch (final Exception e) {
-                            throw new SolrLibException(e);
-                        }
-                    }
-                });
     }
 
+    /** 
+     * Performs an explicit optimize, causing a merge of all segments to one.
+     * <p>
+     * Note: In most cases it is not required to do explicit optimize
+     * @param waitFlush  block until index changes are flushed to disk
+     * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible 
+     * @param maxSegments  optimizes down to at most this number of segments
+     */
     public Collection<UpdateResponse> optimize(final boolean waitFlush,
             final boolean waitSearcher, final int maxSegments) {
         // check this group status
@@ -259,6 +412,9 @@ public class SolrGroup {
                 });
     }
 
+    /**
+     * Issues a ping request to check if the server is alive
+     */
     public Collection<SolrPingResponse> ping() {
         // check this group status
         checkStatus(QueryType.PING);
@@ -276,11 +432,18 @@ public class SolrGroup {
                 });
     }
 
-    public QueryResponse query(final SolrParams params) {
-        return query(params, SolrRequest.METHOD.GET);
-    }
-
-    public QueryResponse query(final SolrParams params, final METHOD method) {
+    /**
+     * Query solr, and stream the results.  Unlike the standard query, this will 
+     * send events for each Document rather then add them to the QueryResponse.
+     * 
+     * Although this function returns a 'QueryResponse' it should be used with care
+     * since it excludes anything that was passed to callback.  Also note that
+     * future version may pass even more info to the callback and may not return 
+     * the results in the QueryResponse.
+     *
+     */
+    public QueryResponse queryAndStreamResponse(final SolrParams params,
+            final StreamingResponseCallback callback) {
         // check this group status
         checkStatus(QueryType.QUERY);
 
@@ -289,7 +452,16 @@ public class SolrGroup {
                 .getMaxRetryCount(QueryType.QUERY);
         for (int i = 0; i < maxRetryCount; i++) {
             try {
-                return queryInternal(params, method);
+                return queryInternal(QueryType.QUERY, params,
+                        new UpdateProcessCallback<QueryResponse>() {
+                            @Override
+                            public QueryResponse callback(
+                                    final SolrServer solrServer)
+                                    throws Exception {
+                                return solrServer.queryAndStreamResponse(
+                                        params, callback);
+                            }
+                        });
             } catch (final SolrLibQueryException e) {
                 throw e;
             } catch (final Exception e) {
@@ -305,78 +477,55 @@ public class SolrGroup {
         throw fsqe;
     }
 
-    private QueryResponse queryInternal(final SolrParams params,
-            final METHOD method) {
-
-        String solrServerName = null;
-        try {
-            SolrServer solrServer = null;
-            AtomicInteger minValue = null;
-            // get a server which is  
-            for (final Map.Entry<String, SolrServer> entry : solrServerMap
-                    .entrySet()) {
-                AtomicInteger count = accessCountMap.get(entry.getKey());
-                if (count == null) {
-                    // set count
-                    count = new AtomicInteger(1);
-                    final AtomicInteger accessCount = accessCountMap
-                            .putIfAbsent(entry.getKey(), count);
-                    if (accessCount != null) {
-                        accessCount.getAndIncrement();
-                        count = accessCount;
-                    }
-                }
-                if ((minValue == null || count.get() < minValue.get())
-                        && statusPolicy.isActive(QueryType.QUERY,
-                                entry.getKey())) {
-                    // active
-                    minValue = count;
-                    solrServerName = entry.getKey();
-                    solrServer = entry.getValue();
-                }
-            }
-
-            if (solrServer == null) {
-                // If all server is unavailable, server group will be 
-                // inactive at the next access
-                throw new SolrLibException("ESL0002",
-                        new Object[] { groupName });
-            }
-
-            // update count
-            if (minValue.getAndIncrement() > MAX_LOAD_COUNT) {
-                // clear all access counts
-                accessCountMap.clear();
-            }
-
-            // status check
-            if (!statusPolicy.isActive(QueryType.QUERY, solrServerName)) {
-                throw new SolrLibServerNotAvailableException(groupName,
-                        solrServerName);
-            }
-
-            final QueryResponse queryResponse = solrServer
-                    .query(params, method);
-
-            // clear error count
-            errorCountMap.remove(solrServerName);
-
-            return queryResponse;
-        } catch (final Exception e) {
-            if (e instanceof SolrException) {
-                switch (((SolrException) e).code()) {
-                case 500:
-                    // an invalid query
-                    throw new SolrLibQueryException("ESL0013",
-                            new Object[] { params }, e);
-                default:
-                    break;
-                }
-            }
-            throw getQueryException(QueryType.QUERY, params, solrServerName, e);
-        }
+    /**
+     * Performs a query to the Solr server
+     * @param params  an object holding all key/value parameters to send along the request
+     */
+    public QueryResponse query(final SolrParams params) {
+        return query(params, SolrRequest.METHOD.GET);
     }
 
+    /**
+     * Performs a query to the Solr server
+     * @param params  an object holding all key/value parameters to send along the request
+     * @param method  specifies the HTTP method to use for the request, such as GET or POST
+     */
+    public QueryResponse query(final SolrParams params, final METHOD method) {
+        // check this group status
+        checkStatus(QueryType.QUERY);
+
+        SolrLibServiceException fsqe = null;
+        final int maxRetryCount = statusPolicy
+                .getMaxRetryCount(QueryType.QUERY);
+        for (int i = 0; i < maxRetryCount; i++) {
+            try {
+                return queryInternal(QueryType.QUERY, params,
+                        new UpdateProcessCallback<QueryResponse>() {
+                            @Override
+                            public QueryResponse callback(
+                                    final SolrServer solrServer)
+                                    throws Exception {
+                                return solrServer.query(params, method);
+                            }
+                        });
+            } catch (final SolrLibQueryException e) {
+                throw e;
+            } catch (final Exception e) {
+                if (fsqe == null) {
+                    fsqe = new SolrLibServiceException("ESL0011",
+                            new Object[] { params.toString() });
+                }
+                fsqe.addException(e);
+            }
+            statusPolicy.sleep(QueryType.QUERY);
+        }
+
+        throw fsqe;
+    }
+
+    /**
+     * SolrServer implementations need to implement how a request is actually processed
+     */
     public NamedList<Object> request(final SolrRequest request) {
         // check this group status
         checkStatus(QueryType.REQUEST);
@@ -386,7 +535,15 @@ public class SolrGroup {
                 .getMaxRetryCount(QueryType.REQUEST);
         for (int i = 0; i < maxRetryCount; i++) {
             try {
-                return requestInternal(request);
+                return queryInternal(QueryType.REQUEST, request,
+                        new UpdateProcessCallback<NamedList<Object>>() {
+                            @Override
+                            public NamedList<Object> callback(
+                                    final SolrServer solrServer)
+                                    throws Exception {
+                                return solrServer.request(request);
+                            }
+                        });
             } catch (final SolrLibQueryException e) {
                 throw e;
             } catch (final Exception e) {
@@ -401,7 +558,9 @@ public class SolrGroup {
         throw fsqe;
     }
 
-    private NamedList<Object> requestInternal(final SolrRequest request) {
+    protected <RESULT> RESULT queryInternal(final QueryType queryType,
+            final Object selectQuery,
+            final UpdateProcessCallback<RESULT> callback) {
 
         String solrServerName = null;
         try {
@@ -422,8 +581,7 @@ public class SolrGroup {
                     }
                 }
                 if ((minValue == null || count.get() < minValue.get())
-                        && statusPolicy.isActive(QueryType.REQUEST,
-                                entry.getKey())) {
+                        && statusPolicy.isActive(queryType, entry.getKey())) {
                     // active
                     minValue = count;
                     solrServerName = entry.getKey();
@@ -445,36 +603,36 @@ public class SolrGroup {
             }
 
             // status check
-            if (!statusPolicy.isActive(QueryType.REQUEST, solrServerName)) {
+            if (!statusPolicy.isActive(queryType, solrServerName)) {
                 throw new SolrLibServerNotAvailableException(groupName,
                         solrServerName);
             }
 
-            final NamedList<Object> response = solrServer.request(request);
+            final RESULT result = callback.callback(solrServer);
 
             // clear error count
             errorCountMap.remove(solrServerName);
 
-            return response;
+            return result;
         } catch (final Exception e) {
-            if (e instanceof SolrException) {
-                switch (((SolrException) e).code()) {
-                case 500:
-                    // an invalid query
-                    throw new SolrLibQueryException("ESL0013",
-                            new Object[] { request }, e);
-                default:
-                    break;
-                }
-            }
-            throw getQueryException(QueryType.REQUEST, request, solrServerName,
-                    e);
+            throw getQueryException(queryType, selectQuery, solrServerName, e);
         }
     }
 
     protected SolrLibException getQueryException(final QueryType queryType,
             final Object selectQuery, final String solrServerName,
             final Exception e) {
+        if (e instanceof SolrException) {
+            switch (((SolrException) e).code()) {
+            case 500:
+                // an invalid query
+                throw new SolrLibQueryException("ESL0013",
+                        new Object[] { selectQuery }, e);
+            default:
+                break;
+            }
+        }
+
         if (solrServerName != null) {
             AtomicInteger errorCount = errorCountMap.get(solrServerName);
             if (errorCount == null) {
@@ -606,7 +764,7 @@ public class SolrGroup {
     }
 
     protected interface UpdateProcessCallback<V> {
-        V callback(SolrServer solrServer);
+        V callback(SolrServer solrServer) throws Exception;
     }
 
 }

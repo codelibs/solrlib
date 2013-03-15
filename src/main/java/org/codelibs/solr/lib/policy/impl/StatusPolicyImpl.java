@@ -66,6 +66,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         switch (queryType) {
         case COMMIT:
         case OPTIMIZE:
+        case ROLLBACK:
             solrGroupProperties.setProperty(getIndexKey(serverName), COMPLETED);
             solrGroupProperties.setProperty(getStatusKey(serverName), ACTIVE);
             solrGroupProperties.store();
@@ -96,6 +97,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
+        case ROLLBACK:
             solrGroupProperties
                     .setProperty(getIndexKey(serverName), UNFINISHED);
         case PING:
@@ -137,6 +139,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
+        case ROLLBACK:
             if (numOfActive >= minUpdateServer) {
                 // this server group is active
                 return true;
@@ -169,6 +172,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
+        case ROLLBACK:
             if (ACTIVE.equals(serverStatus)) {
                 final String serverIndex = solrGroupProperties.getProperty(
                         getIndexKey(serverName), COMPLETED);
@@ -198,6 +202,7 @@ public class StatusPolicyImpl implements StatusPolicy {
             case COMMIT:
             case DELETE:
             case OPTIMIZE:
+            case ROLLBACK:
                 Thread.sleep(retryUpdateQueryInterval);
                 break;
             default:
@@ -219,6 +224,7 @@ public class StatusPolicyImpl implements StatusPolicy {
         case COMMIT:
         case DELETE:
         case OPTIMIZE:
+        case ROLLBACK:
             return maxRetryUpdateQueryCount;
         default:
             break;

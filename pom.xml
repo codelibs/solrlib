@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codelibs.solr</groupId>
   <artifactId>solrlib</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Solr client library</name>
   <url>https://github.com/codelibs/solrlib</url>
@@ -68,8 +68,6 @@
             <link>http://docs.oracle.com/javaee/6/api/</link>
             <link>http://aopalliance.sourceforge.net/doc/</link>
             <link>http://www.csg.is.titech.ac.jp/~chiba/javassist/html/</link>
-            <link>http://www.junit.org/junit/javadoc/4.3/</link>
-            <link>http://www.junit.org/junit/javadoc/3.8.1/</link>
             <link>http://s2container.seasar.org/2.4/s2-framework/ja/apidocs/</link>
             <link>http://s2container.seasar.org/2.4/s2-extension/ja/apidocs/</link>
             <link>http://s2container.seasar.org/2.4/s2-tiger/ja/apidocs/</link>
@@ -103,18 +101,27 @@
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-external</artifactId>
+        <artifactId>wagon-ftp</artifactId>
         <version>2.4</version>
       </extension>
     </extensions>
   </build>
   <distributionManagement>
     <repository>
-      <id>fess-repository</id>
-      <url>scpexe://shell.sourceforge.jp/home/groups/f/fe/fess/htdocs/repository/</url>
+      <id>codelibs-repository</id>
+      <url>ftp://maven.codelibs.org/home/codelibs/maven/</url>
     </repository>
+    <site>
+      <id>codelibs-site</id>
+      <url>ftp://maven.codelibs.org/home/codelibs/project/solrlib/</url>
+    </site>
   </distributionManagement>
   <repositories>
+    <repository>
+      <id>codelibs.org</id>
+      <name>CodeLibs Repository</name>
+      <url>http://maven.codelibs.org/</url>
+    </repository>
     <repository>
       <id>maven.seasar.org</id>
       <name>The Seasar Foundation Maven2 Repository</name>
@@ -125,23 +132,18 @@
       <name>The Seasar Foundation Maven2 Repository</name>
       <url>http://maven.seasar.org/maven2-snapshot/</url>
     </repository>
-    <repository>
-      <id>fess.sourceforge.jp</id>
-      <name>Fess Repository</name>
-      <url>http://fess.sourceforge.jp/repository/</url>
-    </repository>
   </repositories>
   <dependencies>
     <dependency>
       <groupId>org.codelibs</groupId>
       <artifactId>corelib</artifactId>
-      <version>0.1.0</version>
+      <version>0.1.1-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>4.0.0</version>
+      <version>4.2.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -153,7 +155,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>4.1.0</version>
+      <version>4.2.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.commons</groupId>
@@ -168,7 +170,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.2.2</version>
+      <version>4.2.3</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
