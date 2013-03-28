@@ -234,7 +234,8 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.commit(waitFlush, waitSearcher);
+                            return solrServer.commit(waitFlush, waitSearcher,
+                                    softCommit);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
@@ -249,8 +250,7 @@ public class SolrGroup {
      * added may have been committed due to autoCommit, buffer full, other client performing
      * a commit etc.
      */
-    public Collection<UpdateResponse> rollback(final boolean waitFlush,
-            final boolean waitSearcher, final boolean softCommit) {
+    public Collection<UpdateResponse> rollback() {
         // check this group status
         checkStatus(QueryType.ROLLBACK);
 
