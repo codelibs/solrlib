@@ -624,7 +624,9 @@ public class SolrGroup {
             final Exception e) {
         if (e instanceof SolrException) {
             switch (((SolrException) e).code()) {
-            case 500:
+            case 400: // BAD_REQUEST
+            case 404: // NOT_FOUND
+            case 500: // SERVER_ERROR
                 // an invalid query
                 throw new SolrLibQueryException("ESL0013",
                         new Object[] { selectQuery }, e);
