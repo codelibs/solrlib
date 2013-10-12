@@ -28,6 +28,7 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.StreamingResponseCallback;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -226,6 +227,19 @@ public class SolrGroup {
      */
     public Collection<UpdateResponse> commit(final boolean waitFlush,
             final boolean waitSearcher, final boolean softCommit) {
+        return commit(waitFlush, waitSearcher, softCommit, false);
+    }
+
+    /**
+     * Performs an explicit commit, causing pending documents to be committed for indexing
+     * @param waitFlush  block until index changes are flushed to disk
+     * @param waitSearcher  block until a new searcher is opened and registered as the main query searcher, making the changes visible
+     * @param softCommit makes index changes visible while neither fsync-ing index files nor writing a new index descriptor
+     * @param expungeDeletes merge segments with deletes away
+     */
+    public Collection<UpdateResponse> commit(final boolean waitFlush,
+            final boolean waitSearcher, final boolean softCommit,
+            final boolean expungeDeletes) {
         // check this group status
         checkStatus(QueryType.COMMIT);
 
@@ -234,8 +248,11 @@ public class SolrGroup {
                     @Override
                     public UpdateResponse callback(final SolrServer solrServer) {
                         try {
-                            return solrServer.commit(waitFlush, waitSearcher,
-                                    softCommit);
+                            return new UpdateRequest()
+                                    .setAction(UpdateRequest.ACTION.COMMIT,
+                                            waitFlush, waitSearcher, 1,
+                                            softCommit, expungeDeletes)
+                                    .process(solrServer);
                         } catch (final Exception e) {
                             throw new SolrLibException(e);
                         }
