@@ -143,7 +143,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>4.4.0</version>
+      <version>4.6.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -155,7 +155,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>4.4.0</version>
+      <version>4.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.commons</groupId>
@@ -170,7 +170,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.2.3</version>
+      <version>4.2.6</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
