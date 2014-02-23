@@ -36,6 +36,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.codelibs.core.msg.MessageFormatter;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.exception.SolrLibGroupNotAvailableException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
@@ -43,7 +44,8 @@ import org.codelibs.solr.lib.exception.SolrLibServerNotAvailableException;
 import org.codelibs.solr.lib.exception.SolrLibServiceException;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
-import org.seasar.util.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SolrGroup is a proxy implemetation to a group of SolrServer instances.
@@ -53,7 +55,8 @@ import org.seasar.util.log.Logger;
  */
 public class SolrGroup {
 
-    private static final Logger logger = Logger.getLogger(SolrGroup.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(SolrGroup.class);
 
     protected static final int MAX_LOAD_COUNT = Integer.MAX_VALUE / 2;
 
@@ -708,9 +711,9 @@ public class SolrGroup {
         try {
             resultList.add(upc.callback(entry.getValue()));
         } catch (final Exception e) {
-            logger.log(
-                    Logger.format("WSL0003", new Object[] { serverName, upc,
-                            retryCount }), e);
+            logger.warn(
+                    MessageFormatter.getSimpleMessage("WSL0003", new Object[] {
+                            serverName, upc, retryCount }), e);
 
             if (retryCount > statusPolicy.getMaxRetryCount(queryType)) {
                 // set to corrupted
@@ -751,14 +754,15 @@ public class SolrGroup {
                             // activate a server
                             statusPolicy.activate(QueryType.PING, serverName);
                         } else {
-                            logger.log("WSL0002", new Object[] { serverName,
-                                    pingResponse.getStatus() });
+                            logger.warn(MessageFormatter.getSimpleMessage(
+                                    "WSL0002", new Object[] { serverName,
+                                            pingResponse.getStatus() }));
                             // inactivate a server
                             statusPolicy.deactivate(QueryType.PING, serverName);
                         }
                     } catch (final Exception e) {
-                        logger.log(Logger.format("WSL0001",
-                                new Object[] { serverName }), e);
+                        logger.warn(MessageFormatter.getSimpleMessage(
+                                "WSL0001", new Object[] { serverName }), e);
                         statusPolicy.deactivate(QueryType.PING, serverName);
                     }
                 }

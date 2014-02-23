@@ -21,7 +21,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.util.StringUtil;
 
 public class SolrLibServiceException extends SolrLibException {
 
@@ -45,18 +45,18 @@ public class SolrLibServiceException extends SolrLibException {
                 exceptionList.size()));
         int count = 1;
         for (final Exception e : exceptionList) {
-            buf.append(CoreLibConstants.RETURN_STRING);
+            buf.append(StringUtil.RETURN_STRING);
             buf.append("===> Exception ");
             buf.append(count);
             buf.append(": ");
             buf.append(e.getMessage());
-            buf.append(CoreLibConstants.RETURN_STRING);
+            buf.append(StringUtil.RETURN_STRING);
             final StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             buf.append(sw.toString());
             count++;
         }
-        buf.append(CoreLibConstants.RETURN_STRING);
+        buf.append(StringUtil.RETURN_STRING);
         buf.append("Root Exception:");
         return buf.toString();
     }

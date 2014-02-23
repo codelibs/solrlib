@@ -26,11 +26,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.solr.client.solrj.SolrServer;
-import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.msg.MessageFormatter;
 import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.policy.QueryType;
-import org.seasar.util.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Solr server group manager.
@@ -39,7 +41,7 @@ import org.seasar.util.log.Logger;
  *
  */
 public class SolrGroupManager {
-    private static final Logger logger = Logger
+    private static final Logger logger = LoggerFactory
             .getLogger(SolrGroupManager.class);
 
     protected Map<String, SolrGroup> solrGroupMap = new LinkedHashMap<String, SolrGroup>();
@@ -68,9 +70,9 @@ public class SolrGroupManager {
         }
 
         selectGroupName = solrProperties.getProperty(
-                SolrLibConstants.SELECT_GROUP, CoreLibConstants.EMPTY_STRING);
+                SolrLibConstants.SELECT_GROUP, StringUtil.EMPTY);
         updateGroupName = solrProperties.getProperty(
-                SolrLibConstants.UPDATE_GROUP, CoreLibConstants.EMPTY_STRING);
+                SolrLibConstants.UPDATE_GROUP, StringUtil.EMPTY);
 
         // check server name
         if (solrGroupMap.get(selectGroupName) == null) {
@@ -121,9 +123,8 @@ public class SolrGroupManager {
                     try {
                         entry.getValue().updateStatus();
                     } catch (final Exception e) {
-                        logger.log(
-                                Logger.format("ISL0001",
-                                        new Object[] { entry.getKey() }), e);
+                        logger.info(MessageFormatter.getSimpleMessage(
+                                "ISL0001", new Object[] { entry.getKey() }), e);
                     }
                 }
             }
@@ -210,7 +211,7 @@ public class SolrGroupManager {
 
     public void addSolrGroup(final SolrGroup solrGroup) {
         final String name = solrGroup.getGroupName();
-        if (org.seasar.util.lang.StringUtil.isBlank(name)) {
+        if (StringUtil.isBlank(name)) {
             throw new SolrLibException("ESL0007");
         }
         solrGroupMap.put(name, solrGroup);
