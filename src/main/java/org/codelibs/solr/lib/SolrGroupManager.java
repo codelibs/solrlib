@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Solr server group manager.
- * 
+ *
  * @author shinsuke
  *
  */

@@ -2,7 +2,7 @@ package org.codelibs.solr.lib.exception;
 
 /**
  * Group is not available.
- * 
+ *
  * @author shinsuke
  *
  */

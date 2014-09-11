@@ -100,11 +100,15 @@ public class StatusPolicyImpl implements StatusPolicy {
         case ROLLBACK:
             solrGroupProperties
                     .setProperty(getIndexKey(serverName), UNFINISHED);
+            solrGroupProperties.setProperty(getStatusKey(serverName), INACTIVE);
+            solrGroupProperties.store();
+            break;
         case PING:
         case QUERY:
         case REQUEST:
             solrGroupProperties.setProperty(getStatusKey(serverName), INACTIVE);
             solrGroupProperties.store();
+            break;
         default:
             break;
         }

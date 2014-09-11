@@ -16,6 +16,7 @@
 
 package org.codelibs.solr.lib;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.StreamingResponseCallback;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -99,15 +101,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.ADD,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.add(docs, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.add(docs, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -130,15 +132,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.ADD,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.add(doc, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.add(doc, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -161,15 +163,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.ADD,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.addBean(obj, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.addBean(obj, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -192,15 +194,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.ADD,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.addBeans(beans, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.addBeans(beans, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -248,19 +250,19 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.COMMIT,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return new UpdateRequest()
-                    .setAction(UpdateRequest.ACTION.COMMIT,
-                            waitFlush, waitSearcher, 1,
-                            softCommit, expungeDeletes)
-                            .process(solrServer);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return new UpdateRequest()
+                                    .setAction(UpdateRequest.ACTION.COMMIT,
+                                            waitFlush, waitSearcher, 1,
+                                            softCommit, expungeDeletes)
+                                    .process(solrServer);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -276,15 +278,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.ROLLBACK,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.rollback();
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.rollback();
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -307,16 +309,16 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.DELETE,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.deleteByQuery(query,
-                            commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.deleteByQuery(query,
+                                    commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -339,15 +341,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.DELETE,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.deleteById(id, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.deleteById(id, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -370,15 +372,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.DELETE,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.deleteById(ids, commitWithinMs);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.deleteById(ids, commitWithinMs);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -420,16 +422,16 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.OPTIMIZE,
                 new UpdateProcessCallback<UpdateResponse>() {
-            @Override
-            public UpdateResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.optimize(waitFlush, waitSearcher,
-                            maxSegments);
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public UpdateResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.optimize(waitFlush, waitSearcher,
+                                    maxSegments);
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -441,15 +443,15 @@ public class SolrGroup {
 
         return updateQueryCallback(QueryType.PING,
                 new UpdateProcessCallback<SolrPingResponse>() {
-            @Override
-            public SolrPingResponse callback(final SolrServer solrServer) {
-                try {
-                    return solrServer.ping();
-                } catch (final Exception e) {
-                    throw new SolrLibException(e);
-                }
-            }
-        });
+                    @Override
+                    public SolrPingResponse callback(final SolrServer solrServer) {
+                        try {
+                            return solrServer.ping();
+                        } catch (final Exception e) {
+                            throw new SolrLibException(e);
+                        }
+                    }
+                });
     }
 
     /**
@@ -474,14 +476,14 @@ public class SolrGroup {
             try {
                 return queryInternal(QueryType.QUERY, params,
                         new UpdateProcessCallback<QueryResponse>() {
-                    @Override
-                    public QueryResponse callback(
-                            final SolrServer solrServer)
-                                    throws Exception {
-                        return solrServer.queryAndStreamResponse(
-                                params, callback);
-                    }
-                });
+                            @Override
+                            public QueryResponse callback(
+                                    final SolrServer solrServer)
+                                    throws SolrServerException, IOException {
+                                return solrServer.queryAndStreamResponse(
+                                        params, callback);
+                            }
+                        });
             } catch (final SolrLibQueryException
                     | SolrLibServerNotAvailableException e) {
                 throw e;
@@ -522,13 +524,13 @@ public class SolrGroup {
             try {
                 return queryInternal(QueryType.QUERY, params,
                         new UpdateProcessCallback<QueryResponse>() {
-                    @Override
-                    public QueryResponse callback(
-                            final SolrServer solrServer)
-                                    throws Exception {
-                        return solrServer.query(params, method);
-                    }
-                });
+                            @Override
+                            public QueryResponse callback(
+                                    final SolrServer solrServer)
+                                    throws SolrServerException, IOException {
+                                return solrServer.query(params, method);
+                            }
+                        });
             } catch (final SolrLibQueryException
                     | SolrLibServerNotAvailableException e) {
                 throw e;
@@ -559,13 +561,13 @@ public class SolrGroup {
             try {
                 return queryInternal(QueryType.REQUEST, request,
                         new UpdateProcessCallback<NamedList<Object>>() {
-                    @Override
-                    public NamedList<Object> callback(
-                            final SolrServer solrServer)
-                                    throws Exception {
-                        return solrServer.request(request);
-                    }
-                });
+                            @Override
+                            public NamedList<Object> callback(
+                                    final SolrServer solrServer)
+                                    throws SolrServerException, IOException {
+                                return solrServer.request(request);
+                            }
+                        });
             } catch (final SolrLibQueryException
                     | SolrLibServerNotAvailableException e) {
                 throw e;
@@ -792,7 +794,8 @@ public class SolrGroup {
     }
 
     protected interface UpdateProcessCallback<V> {
-        V callback(SolrServer solrServer) throws Exception;
+        V callback(SolrServer solrServer) throws SolrServerException,
+                IOException;
     }
 
 }

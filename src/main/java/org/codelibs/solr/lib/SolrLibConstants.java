@@ -2,7 +2,7 @@ package org.codelibs.solr.lib;
 
 /**
  * Constants.
- * 
+ *
  * @author shinsuke
  *
  */

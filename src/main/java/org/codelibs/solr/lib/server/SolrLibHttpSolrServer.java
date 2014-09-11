@@ -61,9 +61,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * HttpSolrServer implementation.
- * 
+ *
  * @author shinsuke
- * 
+ *
  */
 public class SolrLibHttpSolrServer extends HttpSolrServer {
 
@@ -93,7 +93,7 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
 
     private long connectionMonitorInterval = 10;
 
-    private HttpClientConnectionManager clientConnectionManager;
+    private transient HttpClientConnectionManager clientConnectionManager;
 
     public SolrLibHttpSolrServer(final String solrServerUrl)
             throws MalformedURLException {
@@ -247,29 +247,27 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
         @Override
         public CloseableHttpResponse execute(final HttpHost target,
                 final HttpRequest request, final HttpContext context)
-                throws IOException, ClientProtocolException {
+                throws IOException {
             return closeableHttpClient.execute(target, request,
                     updateHttpContext(context));
         }
 
         @Override
         public CloseableHttpResponse execute(final HttpUriRequest request,
-                final HttpContext context) throws IOException,
-                ClientProtocolException {
+                final HttpContext context) throws IOException {
             return closeableHttpClient.execute(request,
                     updateHttpContext(context));
         }
 
         @Override
         public CloseableHttpResponse execute(final HttpUriRequest request)
-                throws IOException, ClientProtocolException {
+                throws IOException {
             return execute(request, (HttpContext) null);
         }
 
         @Override
         public CloseableHttpResponse execute(final HttpHost target,
-                final HttpRequest request) throws IOException,
-                ClientProtocolException {
+                final HttpRequest request) throws IOException {
             return closeableHttpClient.execute(target, request,
                     (HttpContext) null);
         }
@@ -277,15 +275,14 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
         @Override
         public <T> T execute(final HttpUriRequest request,
                 final ResponseHandler<? extends T> responseHandler)
-                throws IOException, ClientProtocolException {
+                throws IOException {
             return execute(request, responseHandler, null);
         }
 
         @Override
         public <T> T execute(final HttpUriRequest request,
                 final ResponseHandler<? extends T> responseHandler,
-                final HttpContext context) throws IOException,
-                ClientProtocolException {
+                final HttpContext context) throws IOException {
             return closeableHttpClient.execute(request, responseHandler,
                     updateHttpContext(context));
         }
@@ -293,15 +290,14 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
         @Override
         public <T> T execute(final HttpHost target, final HttpRequest request,
                 final ResponseHandler<? extends T> responseHandler)
-                throws IOException, ClientProtocolException {
+                throws IOException {
             return execute(target, request, responseHandler, null);
         }
 
         @Override
         public <T> T execute(final HttpHost target, final HttpRequest request,
                 final ResponseHandler<? extends T> responseHandler,
-                final HttpContext context) throws IOException,
-                ClientProtocolException {
+                final HttpContext context) throws IOException {
             return closeableHttpClient.execute(target, request,
                     responseHandler, updateHttpContext(context));
         }
@@ -346,7 +342,7 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
 
         private final HttpClientConnectionManager connMgr;
 
-        private volatile boolean shutdown;
+        private boolean stopped;
 
         private final long monitorInterval;
 
@@ -363,7 +359,7 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
 
         @Override
         public void run() {
-            while (!shutdown) {
+            while (!stopped) {
                 try {
                     synchronized (this) {
                         wait(monitorInterval);
@@ -378,8 +374,8 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
         }
 
         public void shutdown() {
-            shutdown = true;
             synchronized (this) {
+                stopped = true;
                 notifyAll();
             }
         }
@@ -410,12 +406,12 @@ public class SolrLibHttpSolrServer extends HttpSolrServer {
             if (ceheader != null) {
                 final HeaderElement[] codecs = ceheader.getElements();
                 for (final HeaderElement codec : codecs) {
-                    if (codec.getName().equalsIgnoreCase("gzip")) {
+                    if ("gzip".equalsIgnoreCase(codec.getName())) {
                         response.setEntity(new GzipDecompressingEntity(response
                                 .getEntity()));
                         return;
                     }
-                    if (codec.getName().equalsIgnoreCase("deflate")) {
+                    if ("deflate".equalsIgnoreCase(codec.getName())) {
                         response.setEntity(new DeflateDecompressingEntity(
                                 response.getEntity()));
                         return;
