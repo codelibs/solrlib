@@ -26,9 +26,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.solr.client.solrj.SolrServer;
-import org.codelibs.core.msg.MessageFormatter;
-import org.codelibs.core.util.DynamicProperties;
-import org.codelibs.core.util.StringUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.message.MessageFormatter;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.slf4j.Logger;
@@ -138,18 +138,18 @@ public class SolrGroupManager {
 
     public SolrGroup getSolrGroup(final QueryType queryType) {
         switch (queryType) {
-        case ADD:
-        case COMMIT:
-        case DELETE:
-        case OPTIMIZE:
-        case ROLLBACK:
-            return getSolrGroup(updateGroupName);
-        case QUERY:
-        case REQUEST:
-            return getSolrGroup(selectGroupName);
-        case PING:
-        default:
-            throw new SolrLibException("ESL0009");
+            case ADD:
+            case COMMIT:
+            case DELETE:
+            case OPTIMIZE:
+            case ROLLBACK:
+                return getSolrGroup(updateGroupName);
+            case QUERY:
+            case REQUEST:
+                return getSolrGroup(selectGroupName);
+            case PING:
+            default:
+                throw new SolrLibException("ESL0009");
         }
     }
 

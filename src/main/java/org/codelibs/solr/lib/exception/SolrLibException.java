@@ -16,9 +16,9 @@
 
 package org.codelibs.solr.lib.exception;
 
-import org.codelibs.core.exception.CoreLibRuntimeException;
+import org.codelibs.core.exception.ClRuntimeException;
 
-public class SolrLibException extends CoreLibRuntimeException {
+public class SolrLibException extends ClRuntimeException {
 
     private static final long serialVersionUID = 1L;
 

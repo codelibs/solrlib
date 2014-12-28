@@ -38,7 +38,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.codelibs.core.msg.MessageFormatter;
+import org.codelibs.core.message.MessageFormatter;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.exception.SolrLibGroupNotAvailableException;
 import org.codelibs.solr.lib.exception.SolrLibQueryException;
@@ -649,16 +649,16 @@ public class SolrGroup {
             final Exception e) {
         if (e instanceof SolrException) {
             switch (((SolrException) e).code()) {
-            case 404: // NOT_FOUND
-                throw new SolrLibServerNotAvailableException(groupName,
-                        solrServerName);
-            case 400: // BAD_REQUEST
-            case 500: // SERVER_ERROR
-                // an invalid query
-                throw new SolrLibQueryException("ESL0013",
-                        new Object[] { selectQuery }, e);
-            default:
-                break;
+                case 404: // NOT_FOUND
+                    throw new SolrLibServerNotAvailableException(groupName,
+                            solrServerName);
+                case 400: // BAD_REQUEST
+                case 500: // SERVER_ERROR
+                    // an invalid query
+                    throw new SolrLibQueryException("ESL0013",
+                            new Object[] { selectQuery }, e);
+                default:
+                    break;
             }
         }
 

@@ -18,7 +18,7 @@ package org.codelibs.solr.lib.policy.impl;
 
 import java.util.Set;
 
-import org.codelibs.core.util.DynamicProperties;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.solr.lib.policy.QueryType;
 import org.codelibs.solr.lib.policy.StatusPolicy;
 
