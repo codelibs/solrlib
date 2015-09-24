@@ -26,11 +26,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.client.solrj.response.CoreAdminResponse;
+import org.apache.solr.common.params.CoreAdminParams.CoreAdminAction;
 import org.codelibs.core.msg.MessageFormatter;
 import org.codelibs.core.util.DynamicProperties;
 import org.codelibs.core.util.StringUtil;
 import org.codelibs.solr.lib.exception.SolrLibException;
 import org.codelibs.solr.lib.policy.QueryType;
+import org.codelibs.solr.lib.response.CoreReloadResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +60,8 @@ public class SolrGroupManager {
 
     protected long monitoringInterval = 60 * 1000L;
 
+    protected String adminCorePath = "/../admin/cores";
+
     public long getMonitoringInterval() {
         return monitoringInterval;
     }
@@ -69,10 +75,10 @@ public class SolrGroupManager {
             throw new SolrLibException("ESL0010");
         }
 
-        selectGroupName = solrProperties.getProperty(
-                SolrLibConstants.SELECT_GROUP, StringUtil.EMPTY);
-        updateGroupName = solrProperties.getProperty(
-                SolrLibConstants.UPDATE_GROUP, StringUtil.EMPTY);
+        selectGroupName = solrProperties
+                .getProperty(SolrLibConstants.SELECT_GROUP, StringUtil.EMPTY);
+        updateGroupName = solrProperties
+                .getProperty(SolrLibConstants.UPDATE_GROUP, StringUtil.EMPTY);
 
         // check server name
         if (solrGroupMap.get(selectGroupName) == null) {
@@ -123,8 +129,8 @@ public class SolrGroupManager {
                     try {
                         entry.getValue().updateStatus();
                     } catch (final Exception e) {
-                        logger.info(MessageFormatter.getSimpleMessage(
-                                "ISL0001", new Object[] { entry.getKey() }), e);
+                        logger.info(MessageFormatter.getSimpleMessage("ISL0001",
+                                new Object[] { entry.getKey() }), e);
                     }
                 }
             }
@@ -162,6 +168,37 @@ public class SolrGroupManager {
         }
 
         return solrGroup;
+    }
+
+    public CoreReloadResponse reloadCore(final String coreName) {
+        synchronized (solrProperties) {
+            final CoreReloadResponse response = new CoreReloadResponse();
+
+            for (final Map.Entry<String, SolrGroup> groupEntry : solrGroupMap
+                    .entrySet()) {
+                final String groupName = groupEntry.getKey();
+                for (final Map.Entry<String, SolrServer> serverEntry : groupEntry
+                        .getValue().solrServerMap.entrySet()) {
+                    final String serverName = serverEntry.getKey();
+                    int status = 1;
+                    try {
+                        final SolrServer solrServer = serverEntry.getValue();
+                        final CoreAdminRequest adminRequest = new CoreAdminRequest(
+                                adminCorePath);
+                        adminRequest.setAction(CoreAdminAction.RELOAD);
+                        adminRequest.setCoreName(coreName);
+                        final CoreAdminResponse adminResponse = adminRequest
+                                .process(solrServer);
+                        status = adminResponse.getStatus();
+                    } catch (final Exception e) {
+                        logger.warn("Failed to reload " + coreName + " in "
+                                + groupName + ":" + serverName, e);
+                    }
+                    response.addReloadResult(groupName, serverName, status);
+                }
+            }
+            return response;
+        }
     }
 
     public void applyNewSolrGroup() {
@@ -221,8 +258,17 @@ public class SolrGroupManager {
         return solrProperties;
     }
 
-    public void setSolrProperties(final DynamicProperties groupStatusProperties) {
+    public void setSolrProperties(
+            final DynamicProperties groupStatusProperties) {
         solrProperties = groupStatusProperties;
+    }
+
+    public String getAdminCorePath() {
+        return adminCorePath;
+    }
+
+    public void setAdminCorePath(final String adminCorePath) {
+        this.adminCorePath = adminCorePath;
     }
 
 }
